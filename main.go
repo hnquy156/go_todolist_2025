@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"encoding/json"
-
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/sqlserver"
@@ -37,6 +35,22 @@ type TodoItemUpdate struct {
 	Title       *string `json:"title" gorm:"column:title"`
 	Description *string `json:"description" gorm:"column:description"`
 	Status      *string `json:"status" gorm:"column:status"`
+}
+
+type Paging struct {
+	Page  int   `json:"page" form:"page"`
+	Limit int   `json:"limit" form:"limit"`
+	Total int64 `json:"total" form:"-"`
+}
+
+func (p *Paging) Process() {
+	if p.Page <= 0 {
+		p.Page = 1
+	}
+
+	if p.Limit <= 0 || p.Limit > 100 {
+		p.Limit = 10
+	}
 }
 
 func (TodoItemCreation) TableName() string {
@@ -93,15 +107,6 @@ func createItem(db *gorm.DB) func(*gin.Context) {
 			return
 		}
 
-		jsonData, err := json.Marshal(data)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-		fmt.Println(string(jsonData))
-
 		if err := db.Create(&data).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
@@ -117,9 +122,32 @@ func createItem(db *gorm.DB) func(*gin.Context) {
 
 func getItems(db *gorm.DB) func(*gin.Context) {
 	return func(c *gin.Context) {
-		var data []TodoItem
+		var paging Paging
+		var result []TodoItem
 
-		if err := db.Find(&data).Error; err != nil {
+		if err := c.ShouldBind(&paging); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+
+		paging.Process()
+		offset := (paging.Page - 1) * paging.Limit
+
+		db = db.Where("status <> 'deleted'")
+
+		if err := db.Table(TodoItem{}.TableName()).Count(&paging.Total).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": err.Error(),
+			})
+			return
+		}
+
+		if err := db.Order(" id desc").
+			Offset(offset).
+			Limit(paging.Limit).
+			Find(&result).Error; err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": err.Error(),
 			})
@@ -127,7 +155,8 @@ func getItems(db *gorm.DB) func(*gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, gin.H{
-			"data": data,
+			"data":   result,
+			"paging": paging,
 		})
 	}
 }
