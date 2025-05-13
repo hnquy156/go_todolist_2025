@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"todolist/common"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -35,22 +36,6 @@ type TodoItemUpdate struct {
 	Title       *string `json:"title" gorm:"column:title"`
 	Description *string `json:"description" gorm:"column:description"`
 	Status      *string `json:"status" gorm:"column:status"`
-}
-
-type Paging struct {
-	Page  int   `json:"page" form:"page"`
-	Limit int   `json:"limit" form:"limit"`
-	Total int64 `json:"total" form:"-"`
-}
-
-func (p *Paging) Process() {
-	if p.Page <= 0 {
-		p.Page = 1
-	}
-
-	if p.Limit <= 0 || p.Limit > 100 {
-		p.Limit = 10
-	}
 }
 
 func (TodoItemCreation) TableName() string {
@@ -94,7 +79,7 @@ func main() {
 		}
 	}
 
-	r.Run("localhost:3000") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	r.Run(os.Getenv("APP_HOST")) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
 
 func createItem(db *gorm.DB) func(*gin.Context) {
@@ -122,7 +107,7 @@ func createItem(db *gorm.DB) func(*gin.Context) {
 
 func getItems(db *gorm.DB) func(*gin.Context) {
 	return func(c *gin.Context) {
-		var paging Paging
+		var paging common.Paging
 		var result []TodoItem
 
 		if err := c.ShouldBind(&paging); err != nil {
@@ -154,10 +139,7 @@ func getItems(db *gorm.DB) func(*gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"data":   result,
-			"paging": paging,
-		})
+		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, nil))
 	}
 }
 
@@ -180,9 +162,7 @@ func getItem(db *gorm.DB) func(*gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"data": data,
-		})
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data))
 	}
 }
 
@@ -211,9 +191,7 @@ func updateItem(db *gorm.DB) func(*gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"data": true,
-		})
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }
 
@@ -237,8 +215,6 @@ func deleteItem(db *gorm.DB) func(*gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{
-			"data": true,
-		})
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }
