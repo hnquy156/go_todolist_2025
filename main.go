@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 	"todolist/common"
 
 	"github.com/gin-gonic/gin"
@@ -17,12 +16,10 @@ import (
 
 // Tag json, khi giao tiep vs API se gtiep client thong qua ngon ngu trung gian chinh la javascript object notation
 type TodoItem struct {
-	Id          int        `json:"id"`
-	Title       string     `json:"title"`
-	Description string     `json:"description"`
-	Status      string     `json:"status"`
-	CreatedAt   *time.Time `json:"created_at"`
-	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
+	common.SQLModel
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Status      string `json:"status"`
 }
 
 type TodoItemCreation struct {
