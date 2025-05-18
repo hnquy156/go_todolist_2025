@@ -38,7 +38,7 @@ func main() {
 		items := v1.Group("/items")
 		{
 			items.GET("/", getItems(db))
-			items.GET("/:id", getItem(db))
+			items.GET("/:id", ginitem.GetItem(db))
 			items.POST("/", ginitem.CreateItem(db))
 			items.PUT("/:id", updateItem(db))
 			items.DELETE("/:id", deleteItem(db))
@@ -83,29 +83,6 @@ func getItems(db *gorm.DB) func(*gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, nil))
-	}
-}
-
-func getItem(db *gorm.DB) func(*gin.Context) {
-	return func(c *gin.Context) {
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-
-		var data model.TodoItem
-
-		if err := db.Where("id = ?", id).First(&data).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-
-		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data))
 	}
 }
 
