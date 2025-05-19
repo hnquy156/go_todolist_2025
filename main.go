@@ -3,10 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
-	"todolist/common"
-	"todolist/module/item/model"
 	ginitem "todolist/module/item/transport/gin"
 
 	"github.com/gin-gonic/gin"
@@ -36,7 +33,7 @@ func main() {
 	{
 		items := v1.Group("/items")
 		{
-			items.GET("/", getItems(db))
+			items.GET("/", ginitem.GetItems(db))
 			items.GET("/:id", ginitem.GetItem(db))
 			items.POST("/", ginitem.CreateItem(db))
 			items.PUT("/:id", ginitem.UpdateItem(db))
@@ -45,42 +42,4 @@ func main() {
 	}
 
 	r.Run(os.Getenv("APP_HOST")) // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
-}
-
-func getItems(db *gorm.DB) func(*gin.Context) {
-	return func(c *gin.Context) {
-		var paging common.Paging
-		var result []model.TodoItem
-
-		if err := c.ShouldBind(&paging); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-
-		paging.Process()
-		offset := (paging.Page - 1) * paging.Limit
-
-		db = db.Where("status <> 'deleted'")
-
-		if err := db.Table(model.TodoItem{}.TableName()).Count(&paging.Total).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-
-		if err := db.Order(" id desc").
-			Offset(offset).
-			Limit(paging.Limit).
-			Find(&result).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-
-		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, nil))
-	}
 }
