@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"todolist/common"
 	"todolist/module/item/model"
 	ginitem "todolist/module/item/transport/gin"
@@ -41,7 +40,7 @@ func main() {
 			items.GET("/:id", ginitem.GetItem(db))
 			items.POST("/", ginitem.CreateItem(db))
 			items.PUT("/:id", ginitem.UpdateItem(db))
-			items.DELETE("/:id", deleteItem(db))
+			items.DELETE("/:id", ginitem.DeleteItem(db))
 		}
 	}
 
@@ -83,29 +82,5 @@ func getItems(db *gorm.DB) func(*gin.Context) {
 		}
 
 		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, nil))
-	}
-}
-
-func deleteItem(db *gorm.DB) func(*gin.Context) {
-	return func(c *gin.Context) {
-
-		id, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-
-		if err := db.Table(model.TodoItem{}.TableName()).Where("id = ?", id).Updates(map[string]interface{}{
-			"status": "Deleted",
-		}).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
-		}
-
-		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }
