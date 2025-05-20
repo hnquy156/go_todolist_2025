@@ -24,9 +24,7 @@ func CreateItem(db *gorm.DB) func(*gin.Context) {
 		business := biz.NewCreateItemBiz(store)
 
 		if err := business.CreateNewItem(c.Request.Context(), &data); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
+			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
 

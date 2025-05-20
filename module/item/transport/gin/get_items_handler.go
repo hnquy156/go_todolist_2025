@@ -32,9 +32,7 @@ func GetItems(db *gorm.DB) func(*gin.Context) {
 		data, err := business.GetItems(c.Request.Context(), &query.Paging, &query.Filter)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
+			c.JSON(http.StatusInternalServerError, err)
 			return
 		}
 

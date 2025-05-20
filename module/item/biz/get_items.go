@@ -21,7 +21,7 @@ func NewGetItemsBiz(store GetItemsStorage) *getItemsBiz {
 func (biz *getItemsBiz) GetItems(ctx context.Context, paging *common.Paging, filter *model.Filter) ([]model.TodoItem, error) {
 	data, err := biz.store.GetItems(ctx, paging, filter)
 	if err != nil {
-		return nil, err
+		return nil, common.ErrCannotGetEntity(model.EntityName, err)
 	}
 
 	return data, nil

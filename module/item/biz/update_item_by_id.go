@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"todolist/common"
 	"todolist/module/item/model"
 )
 
@@ -33,20 +34,20 @@ func NewUpdateItemBiz(store UpdateItemStorage) *updateItemBiz {
 
 func (biz *updateItemBiz) UpdateItemById(ctx context.Context, id int, data *model.TodoItemUpdate) error {
 	if err := data.Validate(); err != nil {
-		return err
+		return common.ErrCannotUpdateEntity(model.EntityName, err)
 	}
 
 	item, err := biz.store.GetItem(ctx, map[string]interface{}{"id": id})
 	if err != nil {
-		return err
+		return common.ErrCannotGetEntity(model.EntityName, err)
 	}
 
 	if item.Status == model.DeletedStatus {
-		return model.ErrItemIsDeleted
+		return common.ErrCannotUpdateEntity(model.EntityName, model.ErrItemIsDeleted)
 	}
 
 	if err := biz.store.UpdateItem(ctx, map[string]interface{}{"id": id}, data); err != nil {
-		return err
+		return common.ErrCannotUpdateEntity(model.EntityName, err)
 	}
 
 	return nil
