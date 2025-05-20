@@ -26,3 +26,5 @@ Thumbs.db
 .air/
 
 .ginkgo
+
+/static

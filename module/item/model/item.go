@@ -16,15 +16,17 @@ var (
 // Tag json, khi giao tiep vs API se gtiep client thong qua ngon ngu trung gian chinh la javascript object notation
 type TodoItem struct {
 	common.SQLModel
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
+	Title       string        `json:"title" gorm:"column:title"`
+	Description string        `json:"description" gorm:"column:description"`
+	Status      string        `json:"status" gorm:"column:status"`
+	Image       *common.Image `json:"image" gorm:"column:image"`
 }
 
 type TodoItemCreation struct {
-	Id          int    `json:"-" gorm:"column:id"`
-	Title       string `json:"title" gorm:"column:title"`
-	Description string `json:"description" gorm:"column:description"`
+	Id          int           `json:"-" gorm:"column:id"`
+	Title       string        `json:"title" gorm:"column:title"`
+	Description string        `json:"description" gorm:"column:description"`
+	Image       *common.Image `json:"image" gorm:"column:image"`
 	// Status      string `json:"status" gorm:"column:status"`
 }
 

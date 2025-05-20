@@ -6,6 +6,7 @@ import (
 	"os"
 	"todolist/middleware"
 	ginitem "todolist/module/item/transport/gin"
+	"todolist/module/upload"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -29,10 +30,13 @@ func main() {
 	fmt.Println("Currently connected to DB")
 
 	r := gin.Default()
+	r.Static("/static", "./static")
 	r.Use(middleware.Recover())
 
 	v1 := r.Group("/v1")
 	{
+		v1.PUT("/upload", upload.Upload(db))
+
 		items := v1.Group("/items")
 		{
 			items.GET("/", ginitem.GetItems(db))
