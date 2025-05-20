@@ -15,10 +15,7 @@ func GetItem(db *gorm.DB) func(*gin.Context) {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
+			panic(err)
 		}
 
 		store := storage.NewSQLStore(db)
@@ -27,8 +24,7 @@ func GetItem(db *gorm.DB) func(*gin.Context) {
 		data, err := business.GetItemById(c.Request.Context(), id)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err)
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data))

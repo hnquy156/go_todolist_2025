@@ -16,18 +16,14 @@ func DeleteItem(db *gorm.DB) func(*gin.Context) {
 
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": err.Error(),
-			})
-			return
+			panic(err)
 		}
 
 		store := storage.NewSQLStore(db)
 		business := biz.NewDeleteItemBiz(store)
 
 		if err := business.DeleteItemById(c.Request.Context(), id); err != nil {
-			c.JSON(http.StatusInternalServerError, err)
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))

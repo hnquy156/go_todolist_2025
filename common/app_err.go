@@ -87,3 +87,7 @@ func ErrCannotDeleteEntity(entity string, err error) *AppError {
 	msg := "Can not delete " + entity
 	return NewCustomError(err, msg, "ErrCannotGetItem")
 }
+
+func ErrInternal(err error) *AppError {
+	return NewFullErrorResponse(http.StatusInternalServerError, err, "Internal Server Error", err.Error(), "ErrInternal")
+}

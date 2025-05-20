@@ -14,18 +14,14 @@ func CreateItem(db *gorm.DB) func(*gin.Context) {
 	return func(c *gin.Context) {
 		var data model.TodoItemCreation
 		if err := c.ShouldBind(&data); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{
-				"message": err.Error(),
-			})
-			return
+			panic(err)
 		}
 
 		store := storage.NewSQLStore(db)
 		business := biz.NewCreateItemBiz(store)
 
 		if err := business.CreateNewItem(c.Request.Context(), &data); err != nil {
-			c.JSON(http.StatusInternalServerError, err)
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, gin.H{

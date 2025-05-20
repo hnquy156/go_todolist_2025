@@ -13,6 +13,10 @@ import (
 
 func GetItems(db *gorm.DB) func(*gin.Context) {
 	return func(c *gin.Context) {
+		go func() {
+		}()
+		// var a []int
+		// fmt.Print(a[0])
 		var query struct {
 			common.Paging
 			model.Filter
@@ -32,8 +36,7 @@ func GetItems(db *gorm.DB) func(*gin.Context) {
 		data, err := business.GetItems(c.Request.Context(), &query.Paging, &query.Filter)
 
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err)
-			return
+			panic(err)
 		}
 
 		c.JSON(http.StatusOK, common.NewSuccessResponse(data, query.Paging, query.Filter))

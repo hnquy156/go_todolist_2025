@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"todolist/middleware"
 	ginitem "todolist/module/item/transport/gin"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +29,7 @@ func main() {
 	fmt.Println("Currently connected to DB")
 
 	r := gin.Default()
+	r.Use(middleware.Recover())
 
 	v1 := r.Group("/v1")
 	{
