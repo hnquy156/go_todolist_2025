@@ -10,6 +10,7 @@ var (
 	ErrTitleCannotBeEmpty = errors.New("title can not be empty")
 	ErrItemIsDeleted      = errors.New("this item is deleted")
 	DeletedStatus         = "Deleted"
+	EntityName            = "Item"
 )
 
 // Tag json, khi giao tiep vs API se gtiep client thong qua ngon ngu trung gian chinh la javascript object notation
